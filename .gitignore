@@ -1,6 +1,14 @@
 # Ignore database
 database.db
 clone_wars_quotes.db
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+.vercel/
+.vite/
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

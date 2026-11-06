@@ -1,40 +1,47 @@
-import sqlite3
 import os
+import sqlite3
+from pathlib import Path
 
-def create_database():
-    # Nombre de la base de datos
-    db_name = 'clone_wars_quotes.db'
 
-    # Verificar si el archivo de la base de datos existe y eliminarlo si es así
-    if os.path.exists(db_name):
-        os.remove(db_name)
-        print(f"Database '{db_name}' already existed and has been deleted.")
+BASE_DIR = Path(__file__).resolve().parent
 
-    # Leer el contenido del archivo create_tables.sql
-    with open('sql_files/create_tables.sql', 'r') as file:
-        create_tables_sql = file.read()
 
-    # Conectar a la base de datos (se crea si no existe)
-    conn = sqlite3.connect(db_name)
-    cursor = conn.cursor()
+def database_path() -> Path:
+    configured_path = os.environ.get("CLONE_WARS_DB_PATH")
+    if configured_path:
+        return Path(configured_path)
+    if os.environ.get("VERCEL"):
+        return Path("/tmp/clone_wars_quotes.db")
+    return BASE_DIR / "clone_wars_quotes.db"
 
-    # Crear las tablas
-    cursor.executescript(create_tables_sql)
 
-    # Insertar las citas en distintos idiomas
-    languages_path = 'sql_files/languages'
-    for filename in os.listdir(languages_path):
-        if filename.endswith('.sql'):
-            with open(os.path.join(languages_path, filename), 'r') as file:
-                insert_quotes_sql = file.read()
-                cursor.executescript(insert_quotes_sql)
-                print(f"Inserted quotes from '{filename}'")
+def create_database() -> str:
+    db_path = database_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Confirmar los cambios y cerrar la conexión
-    conn.commit()
-    conn.close()
+    if db_path.exists():
+        try:
+            with sqlite3.connect(db_path) as connection:
+                row = connection.execute(
+                    "SELECT COUNT(*) FROM CLONE_WARS_QUOTES"
+                ).fetchone()
+            if row and row[0] > 0:
+                return str(db_path)
+        except sqlite3.Error:
+            pass
+        db_path.unlink(missing_ok=True)
 
-    print(f"Database '{db_name}' created and tables populated successfully.")
+    schema_path = BASE_DIR / "sql_files" / "create_tables.sql"
+    language_dir = BASE_DIR / "sql_files" / "languages"
+
+    with sqlite3.connect(db_path) as connection:
+        connection.executescript(schema_path.read_text(encoding="utf-8"))
+        for sql_path in sorted(language_dir.glob("*.sql")):
+            connection.executescript(sql_path.read_text(encoding="utf-8"))
+
+    return str(db_path)
+
 
 if __name__ == "__main__":
-    create_database()
+    created_path = create_database()
+    print(f"Database is ready at '{created_path}'.")

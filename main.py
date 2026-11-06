@@ -1,17 +1,28 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
+import os
 import sqlite3
 import random
 
 import create_database as db
 
+
 app = Flask(__name__)
 
+allowed_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+allowed_origins.extend(
+    origin.strip().rstrip("/")
+    for origin in os.environ.get("FRONTEND_ORIGINS", "").split(",")
+    if origin.strip()
+)
+CORS(app, origins=allowed_origins)
+
+DATABASE_PATH = db.create_database()
+
 def get_db_connection():
-    conn = sqlite3.connect('clone_wars_quotes.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
-
-db.create_database()
 
 # all quotes
 
@@ -98,4 +109,4 @@ def languages_list():
 
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '5000')), debug=False)

@@ -10,8 +10,8 @@ python -m venv "%script_path%venv"
 REM Activate the virtual environment (Windows)
 call "%script_path%venv\Scripts\activate"
 
-REM Install dependencies from the file dependences.txt using pip
-pip install -r "%script_path%dependences.txt"
+REM Install dependencies from requirements.txt using pip
+pip install -r "%script_path%requirements.txt"
 
 REM Deactivate the virtual environment
 deactivate

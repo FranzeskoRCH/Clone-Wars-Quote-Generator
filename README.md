@@ -1,56 +1,62 @@
-# Star Wars: The Clone Wars REST API
+# Clone Wars Quote Generator
 
-REST API of Star Wars: The Clone Wars (animated series) chapter opening quotes.
+React, TypeScript, and Vite frontend for the Star Wars: The Clone Wars quotes API. The repository is organized so the frontend and Flask API can be deployed as two Vercel projects from the same GitHub repository.
 
-![TCW-API](https://github.com/AstronautMarkus/sw_clonewars-api/assets/142458866/941ae4b0-d945-4d05-9689-3469d69bc8d1)
+## Local development
 
-# Description
+Use Node.js 20+ and Python 3.12+.
 
-`Star_Wars_TheCloneWars_REST-API` is a REST API that provides opening quotes from the animated series Star Wars: The Clone Wars. It is built in Python using Flask and SQLite.
+1. If this is a fresh checkout, create the Python environment from the repository root with `./create_env.sh` (Windows: `create_env.bat`). Then activate it and run Flask:
 
-# How to Run Locally
+   ```bash
+   source venv/bin/activate
+   python main.py
+   ```
 
-1. **Create virtual environment:**
+2. In a second terminal, install and start the frontend:
 
-   - If you are using Windows, run `create_env.bat`.
-   - If you are using bash, run `create_env.sh`.
-   - The requirements will be installed automatically.\
-2. **Start virtual environment**:
-    - If you are using Windows, use `venv/Scripts/Activate` in your terminal.
-    - If you are using bash, use   `source/venv/bin/activate` in your terminal.
-    - With the virtual environment enabled, run `main.py`.
+   ```bash
+   cd frontend
+   npm ci
+   npm run dev
+   ```
 
-#### After completing these steps, the system will create the database and also insert the data, then it will start automatically.
+Vite proxies frontend API calls to Flask at `127.0.0.1:5000`. The database is created from the checked-in SQL files if it does not already contain quotes.
 
-## URLs
+## Deploy to Vercel
 
-- **GET /quotes:** Returns the entire list of quotes.
-- **GET /quotes/{language}:** Returns quotes in the specified language.
-  - Example: `/quotes/english` Returns all quotes in English.
-- **GET /quotes/quote_id:** Returns a quote by its ID.
-  - Example: `/quotes/1` Returns the appointment with ID 1.
-- **GET /quotes/random/{language}:** Returns a random quote in the specified language.
-  - Example: `/quotes/random/english` Returns a random quote in English.
-- **GET /languages:** Returns the complete list of available languages.
+Deploy the same GitHub repository as two Vercel projects. Vercel supports configuring a separate root directory for each project in a monorepo ([monorepo documentation](https://vercel.com/docs/monorepos)).
 
-## Requirements
+### 1. Deploy the API
 
-The requirements needed for this project are found in the file [`requirements.txt`](https://github.com/AstronautMarkus/Star_Wars_TheCloneWars_REST-API/blob/dev/requirements.txt).
+- Import the repository as a Vercel project named, for example, `clone-wars-quotes-api`.
+- Leave **Root Directory** at the repository root and set **Framework Preset** to Flask.
+- Vercel detects the Flask app exported as `app` from `main.py`. The root `vercel.json` includes the SQL files in the Python function bundle.
+- Deploy and copy the API's production URL, for example `https://clone-wars-quotes-api.vercel.app`.
+- Add `FRONTEND_ORIGINS` as an environment variable with the frontend's exact production origin, such as `https://clone-wars-quotes.vercel.app`. Separate multiple allowed origins with commas.
 
-## Main Files
+### 2. Deploy the frontend
 
-- `main.py`: Main file to run the application.
-- `create_database.py`: Script to create the database. (It runs automatically, do not touch)
-- `create_env.bat` & `create_env.sh`: Scripts to create the virtual environment.
-- `requirements.txt`: File with the necessary dependencies.
+- Import the same repository as a second Vercel project, for example `clone-wars-quotes`.
+- Set **Root Directory** to `frontend` and **Framework Preset** to Vite.
+- Use build command `npm run build` and output directory `dist`.
+- Add `VITE_API_BASE_URL` with the API production URL from step 1, without a trailing slash.
+- Deploy. The `frontend/vercel.json` rewrite supports React Router deep links such as `/quote/1` ([Vercel's Vite SPA guidance](https://vercel.com/docs/frameworks/frontend/vite)).
 
+After Vercel assigns the frontend's production domain, make sure that exact origin is included in the API project's `FRONTEND_ORIGINS` setting, then redeploy the API. Environment variables prefixed with `VITE_` are included in the frontend at build time, so redeploy the frontend after changing `VITE_API_BASE_URL`.
+
+The API database is created under `/tmp` on each new serverless instance from the SQL files in the repository. This is suitable for this read-only quote catalog; it is not persistent storage for user data. The Flask app does not write quote changes.
+
+## API routes
+
+- `GET /quotes` — all quotes
+- `GET /quotes/english` — English quotes
+- `GET /quotes/<id>` — one quote by ID
+- `GET /quotes/random/english` — a random English quote
+- `GET /languages` — available languages
+
+The frontend reads quotes from the API; it does not contain a hardcoded quote list. Favorites are stored in each visitor's browser with localStorage. The Contact page is a UI placeholder and does not send messages.
 
 ## License
 
-This project is licensed by [Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/).
-
-
-
----
-
-#### **Repository:** [Star_Wars_TheCloneWars_REST-API](https://github.com/AstronautMarkus/Star_Wars_TheCloneWars_REST-API)
+This project is licensed under Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0). Check that the license matches your intended use before publishing or using the project commercially.

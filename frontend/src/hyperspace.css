@@ -1,0 +1,105 @@
+.hyperspace-transition {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+  animation: hyperspace-fade 1.2s ease-out both;
+}
+
+.hyperspace-rays {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform-origin: center;
+  animation: hyperspace-expand 1.2s cubic-bezier(.2, .65, .18, 1) both;
+}
+
+.hyperspace-ray {
+  position: absolute;
+  top: 0;
+  left: calc(var(--ray-width) / -2);
+  width: var(--ray-width);
+  height: var(--ray-length);
+  transform: rotate(var(--ray-angle)) translateY(var(--ray-offset));
+  transform-origin: top center;
+  opacity: 0;
+  animation: ray-appear 1.2s ease-out var(--ray-delay) both;
+}
+
+.hyperspace-ray-tone-0 {
+  background: linear-gradient(to bottom, rgba(0, 191, 255, .05), rgba(0, 191, 255, .5) 58%, #00bfff 88%, #fff 100%);
+  filter: drop-shadow(0 0 5px rgba(0, 191, 255, .95));
+}
+
+.hyperspace-ray-tone-1 {
+  background: linear-gradient(to bottom, rgba(22, 141, 255, .03), rgba(22, 141, 255, .36) 58%, #168dff 88%, #e5f8ff 100%);
+  filter: drop-shadow(0 0 5px rgba(22, 141, 255, .8));
+}
+
+.hyperspace-ray-tone-2 {
+  background: linear-gradient(to bottom, rgba(0, 191, 255, .04), rgba(0, 191, 255, .35) 56%, #7ce5ff 88%, #fff 100%);
+  filter: drop-shadow(0 0 4px rgba(124, 229, 255, .9));
+}
+
+.hyperspace-vortex-core {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: clamp(18px, 3vmin, 34px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #000;
+  box-shadow: 0 0 14px 5px rgba(0, 0, 0, .98), 0 0 24px 2px rgba(0, 42, 110, .22);
+  transform: translate(-50%, -50%);
+}
+
+@keyframes hyperspace-expand {
+  0% { opacity: .2; transform: scale(.1); }
+  15% { opacity: .68; transform: scale(.16); }
+  55% { opacity: 1; transform: scale(.85); }
+  82% { opacity: .9; transform: scale(1.85); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+
+@keyframes ray-appear {
+  0%, 8% { opacity: .1; }
+  38%, 72% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes hyperspace-fade {
+  0% { opacity: 0; }
+  10%, 76% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hyperspace-transition,
+  .hyperspace-rays,
+  .hyperspace-ray { animation: none !important; }
+  .hyperspace-transition { opacity: 1; }
+  .hyperspace-rays { display: none; }
+}
+
+.share-menu button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #d4d4d8;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.share-menu button:hover {
+  background: #18181b;
+  color: var(--cyan);
+}

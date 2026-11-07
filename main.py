@@ -10,6 +10,12 @@ import create_database as db
 app = Flask(__name__)
 
 allowed_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+# Vercel creates a new preview hostname for each deployment. Match only this
+# frontend project under the user's Vercel team so previews do not need to be
+# added one by one to FRONTEND_ORIGINS.
+allowed_origins.append(
+    r"^https://clone-wars-quote-generator(?:-[a-z0-9]+)+-franche1\.vercel\.app$"
+)
 allowed_origins.extend(
     origin.strip().rstrip("/")
     for origin in os.environ.get("FRONTEND_ORIGINS", "").split(",")
